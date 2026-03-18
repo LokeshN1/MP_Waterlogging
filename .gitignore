@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Runtime output
+snippets/
+*.log
+
+# Temporary Office/Windows files
+~$*.docx
+~WRL*.tmp
+
+# Optional local artifacts
+*.bak
+*.tmp
+
+model/waterlogging_inceptionv3.keras
