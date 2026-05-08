@@ -1,160 +1,239 @@
-# Waterlogging Detection System
+# 🌊 Waterlogging Detection System
 
-Real-time waterlogging detection pipeline using:
-- An Android or iOS phone as an IP camera,
-- Periodic frame capture to disk,
-- TensorFlow/Keras (MobileNetV1) classification,
-- A browser-based Flask dashboard for live monitoring.
+An AI-powered real-time waterlogging detection system that uses your phone as a live IP camera, captures frames periodically, classifies them using a TensorFlow/Keras MobileNetV1 model, and displays results on a live browser-based dashboard.
 
-## Features
+---
 
-- Live frame capture from phone camera (`/shot.jpg` endpoint).
-- GUI dashboard with prediction history and alert controls.
-- CLI detector for terminal-only monitoring.
-- Model-loading compatibility handling for different Keras versions.
+## 📋 Table of Contents
 
-## Project Layout
+- [Features](#features)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Step 1 — Clone the Repository](#step-1--clone-the-repository)
+- [Step 2 — Set Up Python Environment](#step-2--set-up-python-environment)
+- [Step 3 — Download the Model](#step-3--download-the-model)
+- [Step 4 — Connect Your Phone Camera](#step-4--connect-your-phone-camera)
+- [Step 5 — Run the System](#step-5--run-the-system)
+- [Scripts Reference](#scripts-reference)
+- [Troubleshooting](#troubleshooting)
+
+---
+
+## ✨ Features
+
+- 📷 Live frame capture from Android or iOS phone camera over Wi-Fi
+- 🤖 AI classification — **Waterlogged** vs **Non-Waterlogged** with confidence score
+- 🖥️ Browser dashboard at `http://localhost:5000` with live preview, history & alerts
+- 🔔 Configurable alert threshold and cooldown
+- 📂 Analyse any image manually via the dashboard upload button
+
+---
+
+## 📁 Project Structure
 
 ```
-Major Project/
-|-- model/
-|   |-- waterlogging_inceptionv3.keras
-|   `-- waterlogging_mobilenet_v1.h5
-|-- analyis/
-|-- resultImg2/
-|-- snippet_capture.py
-|-- snippets_detector_gui.py
-|-- detect_snippets.py
-|-- waterlogging_detection.py
-|-- test_model.py
-|-- requirements.txt
-|-- .gitignore
-|-- .gitattributes
-`-- README.md
+MP_Waterlogging/
+├── model/
+│   ├── waterlogging_mobilenet_v1.h5     ← main model (tracked in git)
+│   └── model.weights.h5                 ← NOT in git (download via script)
+├── analyis/                             ← sample analysis images
+├── snippets/                            ← auto-created; captured frames go here
+├── snippet_capture.py                   ← captures frames from phone camera
+├── snippets_detector_gui.py             ← browser dashboard (Flask)
+├── detect_snippets.py                   ← CLI-only frame monitor
+├── waterlogging_detection.py            ← model loading & prediction logic
+├── test_model.py                        ← quick test against sample images
+├── download_model.py                    ← downloads model weights from Drive
+├── requirements.txt
+└── README.md
 ```
 
-## Prerequisites
+---
 
-- Python 3.10 or 3.11 recommended
-- **Android**: [IP Webcam](https://play.google.com/store/apps/details?id=com.pas.webcam) app
-- **iOS**: [IP Camera Lite](https://apps.apple.com/app/ip-camera-lite/id1343055863) app
-- Phone and computer connected to the same Wi-Fi network
+## ✅ Prerequisites
 
-## Setup
+| Requirement | Details |
+|---|---|
+| **Python** | 3.10 or 3.11 recommended |
+| **Phone** | Android or iOS, on the **same Wi-Fi** as your PC |
+| **Camera app** | Android: [IP Webcam](https://play.google.com/store/apps/details?id=com.pas.webcam) · iOS: [IP Camera Lite](https://apps.apple.com/app/ip-camera-lite/id1343055863) |
+| **Internet** | Required once to download model weights |
 
-1. Clone the repository.
-2. Create and activate a virtual environment.
-3. Install dependencies:
+---
+
+## Step 1 — Clone the Repository
 
 ```bash
+git clone https://github.com/Kunalwaldia8/MP_Waterlogging.git
+cd MP_Waterlogging
+```
+
+---
+
+## Step 2 — Set Up Python Environment
+
+Create and activate a virtual environment, then install all dependencies.
+
+**Linux / macOS:**
+```bash
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Download the model weights:
+**Windows (PowerShell):**
+```powershell
+python -m venv venv
+venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+**Windows (Command Prompt):**
+```cmd
+python -m venv venv
+venv\Scripts\activate.bat
+pip install -r requirements.txt
+```
+
+---
+
+## Step 3 — Download the Model
+
+The model weights file (~195 MB) is too large for GitHub and is **not included** in the repo. Run this script once to download it automatically from Google Drive:
 
 ```bash
 python download_model.py
 ```
 
-## ⬇️ Download Model Weights (Required)
+You should see:
+```
+⬇️  Downloading model weights via gdown...
+✅  Downloaded successfully → model/model.weights.h5 (194.5 MB)
+```
 
-The model file (`model/model.weights.h5`, ~195 MB) is too large for GitHub and is **not included in the repo**.
+> If the script fails, download manually from [this Google Drive link](https://drive.google.com/file/d/1xEwaTW40q26I2tFFIQ4SC5M74zRR2liK/view?usp=sharing) and place the file at `model/model.weights.h5`.
 
-**After cloning, run this once:**
+---
+
+## Step 4 — Connect Your Phone Camera
+
+### Android — IP Webcam
+
+1. Install **[IP Webcam](https://play.google.com/store/apps/details?id=com.pas.webcam)** from the Play Store
+2. Open the app → scroll to the bottom → tap **"Start server"**
+3. Note the IP shown (e.g. `192.168.1.5:8080`)
+4. Open `snippet_capture.py` and update line 6:
+   ```python
+   CAMERA_URL_BASE = 'http://192.168.1.5:8080/shot.jpg'
+   ```
+
+### iOS — IP Camera Lite
+
+1. Install **[IP Camera Lite](https://apps.apple.com/app/ip-camera-lite/id1343055863)** from the App Store
+2. Open the app → tap **"Start"**
+3. Note the IP shown (e.g. `192.168.1.7:8080`)
+4. Open `snippet_capture.py` and update line 6:
+   ```python
+   CAMERA_URL_BASE = 'http://192.168.1.7:8080/photo.jpg'
+   ```
+   *(Note: iOS uses `/photo.jpg`, Android uses `/shot.jpg`)*
+
+### Verify connection
+
+Open the camera URL in your PC browser — you should see a live photo from your phone. If it shows a username/password prompt, disable authentication in the app settings.
+
+---
+
+## Step 5 — Run the System
+
+You need **two terminals** running simultaneously.
+
+### Terminal 1 — Start capturing frames
 
 ```bash
-python download_model.py
-```
+# Make sure your venv is active
+source venv/bin/activate        # Linux/macOS
+# or: venv\Scripts\activate     # Windows
 
-This will automatically download the weights from Google Drive.
-
-> If the script fails, download manually from the link in `download_model.py` and place the file at `model/model.weights.h5`.
-
-## Configure Camera URL
-
-In `snippet_capture.py`, update:
-
-```python
-CAMERA_URL_BASE = "http://<phone-ip>:8080/shot.jpg"
-```
-
-Example:
-
-```python
-CAMERA_URL_BASE = "http://192.168.1.6:8080/shot.jpg"
-```
-
-## How to Run This Project
-
-Follow these steps in order.
-
-1. Install IP Webcam from play store.then Start the IP Webcam server on your Android phone.(jab tum ip webcam app ko install kr doge to use scroll krna last m option hoga start server use start krna tumhara camera open ho jayega. fir wha bottom me ip address likha hoga tumhe uss ip address ko note krna h)
-2. Make sure phone and laptop are on the same Wi-Fi.
-3. Confirm `CAMERA_URL_BASE` in `snippet_capture.py` points to your phone IP.(`snippet_capture.py` file me jha per `CAMERA_URL_BASE` likha hoga wha per wo ip address dal dena)
-
-### Step 1: Open project in terminal
-
-```bash
-cd "c:\Users\lokes\Desktop\Major Project"
-```
-
-### Step 2: Create and activate virtual environment (recommended)
-
-PowerShell:
-
-```bash
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
-
-Command Prompt (CMD):
-
-```bash
-python -m venv .venv
-.venv\Scripts\activate.bat
-pip install -r requirements.txt
-```
-
-### Step 3: Run capture and detection (two terminals)
-
-Terminal 1 (frame capture):
-iss files s live photo capture hogi, wha per ek `snippets` folder ban jayega 
-```bash
 python snippet_capture.py
 ```
 
-Terminal 2 (Web dashboard — opens in browser automatically):
-isme tum dekh paoge result at http://127.0.0.1:5000
+Expected output:
+```
+Capturing from http://192.168.1.5:8080/shot.jpg every 3 seconds...
+Saved: snippets/frame_20260509_001500.jpg
+Saved: snippets/frame_20260509_001503.jpg
+...
+```
+
+### Terminal 2 — Start the dashboard
+
 ```bash
+source venv/bin/activate
 python snippets_detector_gui.py
 ```
 
+Expected output:
+```
+🌊 Flood Vision Console running at  http://127.0.0.1:5000
+   Press Ctrl+C to stop.
+```
 
+Your browser will open automatically at **http://127.0.0.1:5000** showing:
+- 📸 Live preview of the latest captured frame
+- 🤖 AI verdict (Waterlogged / Non-Waterlogged) with confidence %
+- 📊 Prediction history table
+- 🔔 Alert log with configurable threshold
 
-### How to stop
+### Stop the system
 
-- Press `Ctrl+C` in both terminal windows.
+Press `Ctrl+C` in both terminals.
 
-## Scripts
+---
 
-- `snippet_capture.py`: captures frames every few seconds into `snippets/`.
-- `snippets_detector_gui.py`: live dashboard, alerting, and history.
-- `detect_snippets.py`: watches `snippets/` and prints predictions.
-- `waterlogging_detection.py`: model loading and `predict_waterlogging()`.
-- `test_model.py`: quick test against images inside `analyis/`.
+## 🧪 Quick Test (No Phone Needed)
 
-## Troubleshooting
+To verify the model works without a phone, run:
 
-- Cannot connect to camera URL:
-   Ensure phone and PC are on same Wi-Fi and IP is correct.
-- GUI shows no frames:
-   Start `snippet_capture.py` first and verify `snippets/` is being populated.
-- TensorFlow model load errors:
-   Use Python 3.10/3.11 and install dependencies from `requirements.txt`.
-- Push rejected by GitHub due to file size:
-   Use Git LFS for files in `model/`.
+```bash
+python test_model.py
+```
 
-## License
+This classifies the sample images in the `analyis/` folder and prints results:
+```
+img1.jpg  →  Non-Waterlogged   Confidence: 94.07%
+img3.jpg  →  Waterlogged       Confidence: 95.84%
+```
 
-No license file is currently included. Add one (for example, MIT) before public distribution if needed.
+---
+
+## 📜 Scripts Reference
+
+| Script | Purpose |
+|---|---|
+| `snippet_capture.py` | Fetches a frame from the phone camera every 3 seconds and saves to `snippets/` |
+| `snippets_detector_gui.py` | Runs the Flask web dashboard at port 5000 |
+| `detect_snippets.py` | Terminal-only version — watches `snippets/` and prints predictions |
+| `waterlogging_detection.py` | Core module — model loading and `predict_waterlogging()` function |
+| `test_model.py` | Runs inference on the sample images in `analyis/` |
+| `download_model.py` | Downloads `model/model.weights.h5` from Google Drive |
+
+---
+
+## 🔧 Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| `ModuleNotFoundError` | Make sure your virtual environment is activated and `pip install -r requirements.txt` was run |
+| Camera URL not reachable | Ensure phone and PC are on **the same Wi-Fi network** |
+| Browser shows login prompt | Disable username/password in the camera app settings |
+| `model.weights.h5` not found | Run `python download_model.py` |
+| Dashboard shows "No frames found" | Start `snippet_capture.py` first and wait a few seconds |
+| TensorFlow GPU warnings | These are harmless — the model runs fine on CPU |
+| Push rejected (file too large) | `model/` files are in `.gitignore` — do not add them to git |
+
+---
+
+## 📄 License
+
+No license file is currently included. Add one (e.g. MIT) before public distribution.
