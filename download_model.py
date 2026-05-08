@@ -15,7 +15,7 @@ import sys
 # ── Configuration ──────────────────────────────────────────────────────────────
 # Paste your Google Drive shareable link here after uploading model.weights.h5
 # It should look like: https://drive.google.com/file/d/XXXX/view?usp=sharing
-GDRIVE_SHARE_URL = "PASTE_YOUR_GOOGLE_DRIVE_LINK_HERE"
+GDRIVE_SHARE_URL = "https://drive.google.com/file/d/1xEwaTW40q26I2tFFIQ4SC5M74zRR2liK/view?usp=sharing"
 
 MODEL_DIR = os.path.join(os.path.dirname(__file__), "model")
 MODEL_PATH = os.path.join(MODEL_DIR, "model.weights.h5")
