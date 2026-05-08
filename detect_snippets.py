@@ -5,6 +5,7 @@ from waterlogging_detection import ModelUnavailableError, predict_waterlogging
 
 # Folder containing snippets
 SNIPPETS_DIR = 'snippets'
+os.makedirs(SNIPPETS_DIR, exist_ok=True)
 
 def predict_snippet(img_path):
     label, confidence, _ = predict_waterlogging(img_path)

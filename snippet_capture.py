@@ -3,7 +3,7 @@ import time
 import os
 import random
 
-CAMERA_URL_BASE = 'http://192.168.1.6:8080/shot.jpg'  # change to your camera's URL
+CAMERA_URL_BASE = 'http://192.168.29.251:8080/shot.jpg'  # change to your camera's URL
 
 CAPTURE_INTERVAL_SEC = 3
 OUTPUT_DIR = 'snippets'
