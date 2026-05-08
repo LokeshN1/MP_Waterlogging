@@ -1,10 +1,10 @@
 # Waterlogging Detection System
 
 Real-time waterlogging detection pipeline using:
-- an Android phone as an IP camera,
-- periodic frame capture to disk,
-- TensorFlow/Keras classification,
-- a Tkinter dashboard for live monitoring.
+- An Android or iOS phone as an IP camera,
+- Periodic frame capture to disk,
+- TensorFlow/Keras (MobileNetV1) classification,
+- A browser-based Flask dashboard for live monitoring.
 
 ## Features
 
@@ -36,7 +36,8 @@ Major Project/
 ## Prerequisites
 
 - Python 3.10 or 3.11 recommended
-- Android phone with [IP Webcam](https://play.google.com/store/apps/details?id=com.pas.webcam)
+- **Android**: [IP Webcam](https://play.google.com/store/apps/details?id=com.pas.webcam) app
+- **iOS**: [IP Camera Lite](https://apps.apple.com/app/ip-camera-lite/id1343055863) app
 - Phone and computer connected to the same Wi-Fi network
 
 ## Setup
@@ -49,19 +50,25 @@ Major Project/
 pip install -r requirements.txt
 ```
 
-## GitHub Note (Important)
-
-The file `model/waterlogging_inceptionv3.keras` is large and should be tracked via Git LFS.
-
-If you are pushing this repo for the first time:
+4. Download the model weights:
 
 ```bash
-git lfs install
-git lfs track "model/*.keras" "model/*.h5"
-git add .gitattributes
+python download_model.py
 ```
 
-Then add/commit/push as usual.
+## ⬇️ Download Model Weights (Required)
+
+The model file (`model/model.weights.h5`, ~195 MB) is too large for GitHub and is **not included in the repo**.
+
+**After cloning, run this once:**
+
+```bash
+python download_model.py
+```
+
+This will automatically download the weights from Google Drive.
+
+> If the script fails, download manually from the link in `download_model.py` and place the file at `model/model.weights.h5`.
 
 ## Configure Camera URL
 
@@ -117,8 +124,8 @@ iss files s live photo capture hogi, wha per ek `snippets` folder ban jayega
 python snippet_capture.py
 ```
 
-Terminal 2 (GUI dashboard):
-isme tum dekh paoge result
+Terminal 2 (Web dashboard — opens in browser automatically):
+isme tum dekh paoge result at http://127.0.0.1:5000
 ```bash
 python snippets_detector_gui.py
 ```
@@ -127,8 +134,7 @@ python snippets_detector_gui.py
 
 ### How to stop
 
-- Press `Ctrl+C` in terminal windows.
-- Close the Tkinter GUI window.
+- Press `Ctrl+C` in both terminal windows.
 
 ## Scripts
 
