@@ -24,4 +24,5 @@ snippets/
 *.bak
 *.tmp
 
-model/waterlogging_inceptionv3.keras
+model/waterlogging_inceptionv3.keras# Large model files - too big for GitHub (>100MB)
+model/model.weights.h5
